@@ -571,8 +571,8 @@ def parse_command_line():
 
         parser.add_argument("--profiles", dest="profiles",
                             help=(
-                                "List of packages all,memory,registry,evt,fs,health. And advanced packages: filecatcher,"
-                                "dump \r\n use: --packages all or --packages fs,memory"))
+                                "List of profiles: fast,dump,all"
+                                 "\r\n use: --profiles fast or --profiles dump --profiles all"))
         parser.add_argument("--output_dir", dest="output_dir", help="Directory to extract data")
         parser.add_argument("--dir_zip", dest='dir_zip', help='directory to store zip')
         parser.add_argument("--debug", dest="debug", default=False, action='store_true', help="debug level")
