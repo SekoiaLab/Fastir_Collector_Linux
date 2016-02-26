@@ -44,6 +44,7 @@ ifconfig = ['ifconfig', '-a']
 os_version = ['cat', '/proc/version']
 whoami = ['who', 'am', 'i']
 uname_os_name = ['uname']
+lsmod = ['lsmod']
 # output
 pattern_last_output = "([^\s]+)\s+(\([^\)]*\)|system \S+|\S+)(.+[^\d])(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
 
@@ -53,7 +54,7 @@ header_last_output = ['User', 'Way of connection', 'Date', 'Remote host']
 header_netstat = ['Proto', 'Recv-Q', 'Send-Q', 'Local Address', 'Remote Address', 'State', 'User', 'Inode',
                   'PID/Program name']
 header_fs = ['path', 'mime', 'filesize', 'owner', 'group', 'atime', 'mtime', 'ctime', 'inode']
-
+header_lsmod = ['Module', 'Size', 'Used_by_Count', 'Used_by_Modules']
 
 class utils(object):
     def __init__(self, args):
@@ -360,6 +361,21 @@ class LiveInformations(object):
         except:
             self.args['logger'].error("%s command failed" % ' '.join(lsof))
 
+    def get_modules(self):
+        try:
+            self.args['logger'].info(' '.join(lsmod))
+            res = utils.exec_cmd(lsmod)
+            res_without_spaces = self._delete_spaces(res)
+            # Add '-' to module entries that are used by 0 modules
+            # so that every entry has same number of fields
+            for entry in res_without_spaces:
+                if len(entry) == 3:
+                    entry.append('-')
+            map = utils.list_to_map(header_lsmod, res_without_spaces)
+            self.args['logger'].info('Write in csv file %s ' % os.path.join(self.args['output_dir'], "modules.csv"))
+            utils.write_to_csv(map, header_lsmod, os.path.join(self.args['output_dir'], "modules.csv"))
+        except:
+            self.args['logger'].error("%s command failed" % ' '.join(lsmod))
 
     def get_additionnal_info(self):
         self._get_kernel_version()
