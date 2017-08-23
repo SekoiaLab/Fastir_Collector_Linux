@@ -168,7 +168,6 @@ class FileSystem(object):
         return not any(check_dir)
 
     def get_infos_fs(self):
-        list_files = []
         writer = None
         self.args['logger'].info('Start make time line FS')
         for dirName, subdirList, fileList in os.walk(start_fs):
@@ -184,8 +183,7 @@ class FileSystem(object):
                     mime = res[0].split(':')[1].lstrip()
                     record['mime'] = mime
                     if not writer:
-                        writer = utils.open_csv(header_fs
-                                                ,
+                        writer = utils.open_csv(header_fs,
                                                 os.path.join(self.args['output_dir'], 'fs.csv'))
                         if hasattr(writer, 'writeheader'):
                             writer.writeheader()
@@ -360,7 +358,6 @@ class LiveInformations(object):
         except:
             self.args['logger'].error("%s command failed" % ' '.join(lsof))
 
-
     def get_additionnal_info(self):
         self._get_kernel_version()
         self._get_hostname()
@@ -479,7 +476,7 @@ class Dump(object):
     def dump_mbr(self):
         if utils.os_type() == "mac":
             pass
-        else :
+        else:
             self.args['logger'].info('Collect active MBR')
             r = utils.exec_cmd(fdisk, True)
             res = re.split("\\n\\s*\\n", r)
@@ -572,28 +569,28 @@ def parse_command_line():
         parser.add_argument("--profiles", dest="profiles",
                             help=(
                                 "List of profiles: fast,dump,all"
-                                 "\r\n use: --profiles fast or --profiles dump --profiles all"))
+                                "\n use: --profiles fast or --profiles dump --profiles all"))
         parser.add_argument("--output_dir", dest="output_dir", help="Directory to extract data")
         parser.add_argument("--dir_zip", dest='dir_zip', help='directory to store zip')
         parser.add_argument("--debug", dest="debug", default=False, action='store_true', help="debug level")
         arguments = parser.parse_args()
         if not arguments.output_dir:
-            parser.print_help()
-            sys.exit(-1)
+            print('No output directory specified. Using "output" as default')
+            arguments.output_dir = 'output'
         if not arguments.profiles:
-            parser.print_help()
-            sys.exit(-1)
+            print('No profile specified. Using "fast" as default')
+            arguments.profiles = 'fast'
         args['output_dir'] = arguments.output_dir
         args['dir_zip'] = arguments.dir_zip
         if not arguments.dir_zip:
-            args['dir_zip'] = os.path.dirname(__file__)
+            args['dir_zip'] = args['output_dir']
 
         args['profiles'] = arguments.profiles.split(';')
 
         if arguments.debug:
             args['level_debug'] = logging.DEBUG
     except Exception as e:
-        print e
+        print(e)
         args['output_dir'] = sys.argv[1]
         args['dir_zip'] = sys.argv[2]
         args['profiles'] = sys.argv[3].split(';')
@@ -607,13 +604,13 @@ def create_output_dir(args):
     try:
         os.makedirs(path)
     except IOError as e:
-        print "I/O error({0}): {1}".format(e.errno, e.strerror)
+        print("I/O error({0}): {1}".format(e.errno, e.strerror))
         sys.exit(-1)
     except ValueError:
-        print "Could not convert data"
+        print("Could not convert data")
         sys.exit(-1)
     except:
-        print "Unexpected error:", sys.exc_info()[0]
+        print("Unexpected error:", sys.exc_info()[0])
 
     return path
 
@@ -623,10 +620,11 @@ def set_zip_evidences(args):
     items = path_output_dir.split(os.path.sep)[::-1]
 
     name_zip_file = items[0] + '_' + items[1] + '.zip'
+    zip_path = os.path.join(args['dir_zip'], name_zip_file)
     args['logger'].info('Create zip File %s ' % name_zip_file)
-    my_zip = ZipFile(os.path.join(args['dir_zip'], name_zip_file), 'w')
-    path_zip = os.path.sep.join(path_output_dir.split(os.sep)[::-1][2:][::-1])
-    for dirName, subdirList, fileList in os.walk(path_zip, topdown=False):
+    my_zip = ZipFile(zip_path, 'w')
+
+    for dirName, subdirList, fileList in os.walk(path_output_dir, topdown=False):
         for fname in fileList:
             my_zip.write(os.path.join(dirName, fname))
     my_zip.close()
@@ -635,6 +633,10 @@ def set_zip_evidences(args):
 
 
 def main():
+    if os.geteuid() != 0:
+        print('This program should be run as root.')
+        sys.exit(-1)
+
     args = parse_command_line()
     args['output_dir'] = create_output_dir(args)
     set_logger(args)
