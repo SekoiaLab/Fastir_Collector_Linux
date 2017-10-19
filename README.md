@@ -8,6 +8,7 @@ All code must be in a python 2 file and support starts at 2.4. This program shou
 
 * System Informations   
   * Kernel version
+  * Kernel modules
   * Network interfaces
   * Hostname
   * Distribution versions
