@@ -135,7 +135,7 @@ class utils(object):
 
     @staticmethod
     def zip_file(list_to_zip, zip_filename, output_dir, logger):
-        my_zip = ZipFile(os.path.join(output_dir, zip_filename), 'w')
+        my_zip = ZipFile(os.path.join(output_dir, zip_filename), 'w', allowZip64=True)
         for path in list_to_zip:
             try:
                 my_zip.write(path)
@@ -639,7 +639,7 @@ def set_zip_evidences(args):
     name_zip_file = items[0] + '_' + items[1] + '.zip'
     zip_path = os.path.join(args['dir_zip'], name_zip_file)
     args['logger'].info('Create zip File %s ' % name_zip_file)
-    my_zip = ZipFile(zip_path, 'w')
+    my_zip = ZipFile(zip_path, 'w', allowZip64=True)
 
     for dirName, subdirList, fileList in os.walk(path_output_dir, topdown=False):
         for fname in fileList:
