@@ -1,4 +1,7 @@
 # FastIR Collector Linux
+
+**We changed our approach to live forensics acquisition, which means FastIR Collector is no longer maintained. We recommend using our new [FastIR Artifacts collector](https://github.com/SekoiaLab/fastir_artifacts) instead**
+
 ## Concepts
 This tool collects different artefacts on live Linux and records the results in csv files.
 With the analysis of these artefacts, an early compromission can be detected.
